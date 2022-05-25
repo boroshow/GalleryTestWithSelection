@@ -13,6 +13,7 @@ class RecyclerAdapter(private val list: List<RecyclerEntity>) :
     var onItemClick: ((RecyclerEntity) -> Unit)? = null
     var onItemLongClick: ((RecyclerEntity) -> Unit)? = null
     var boolean: Boolean = false
+    var mutableList = mutableListOf<RecyclerEntity>()
 
     inner class RecyclerViewHolder(private val binding: ItemRecyclerBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -21,28 +22,36 @@ class RecyclerAdapter(private val list: List<RecyclerEntity>) :
 
             itemView.setOnClickListener {
                 if (boolean) {
-                    onItemClick?.invoke(list[absoluteAdapterPosition])
-                    if (ent.enabled) {
-                        ent.enabled = false
-                        binding.imgSelected.isVisible = false
-                        binding.btnRadio.isEnabled = false
+                    if (mutableList.isEmpty()) {
+                        boolean = false
                     } else {
-                        ent.enabled = true
-                        binding.imgSelected.isVisible = true
-                        binding.btnRadio.isEnabled = true
+                        onItemClick?.invoke(list[absoluteAdapterPosition])
+                        if (ent.enabled) {
+                            ent.enabled = false
+                            mutableList.remove(ent)
+                            binding.imgSelected.isVisible = false
+                            binding.btnRadio.isEnabled = false
+                        } else {
+                            ent.enabled = true
+                            mutableList.add(ent)
+                            binding.imgSelected.isVisible = true
+                            binding.btnRadio.isEnabled = true
+                        }
                     }
                 }
             }
 
             itemView.setOnLongClickListener {
-                boolean = true
                 onItemLongClick?.invoke(list[absoluteAdapterPosition])
+                boolean = true
                 if (ent.enabled) {
                     ent.enabled = false
+                    mutableList.remove(ent)
                     binding.imgSelected.isVisible = false
                     binding.btnRadio.isEnabled = false
                 } else {
                     ent.enabled = true
+                    mutableList.add(ent)
                     binding.imgSelected.isVisible = true
                     binding.btnRadio.isEnabled = true
                 }
