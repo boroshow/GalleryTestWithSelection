@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         RecyclerEntity("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOp29Aat6-qHVGPAcjBHK2odw1s7xRg3rx09FFn8m1TS1H04nGorAra4sDdlmkqZPIilc&usqp=CAU",
             false)
     )
-    private var lists = mutableListOf<RecyclerEntity>()
 
     private val adapter: RecyclerAdapter by lazy {
         RecyclerAdapter(list)
