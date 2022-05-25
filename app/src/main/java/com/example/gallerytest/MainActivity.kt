@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -26,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         RecyclerEntity("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOp29Aat6-qHVGPAcjBHK2odw1s7xRg3rx09FFn8m1TS1H04nGorAra4sDdlmkqZPIilc&usqp=CAU",
             false)
     )
+    private var lists = mutableListOf<RecyclerEntity>()
 
     private val adapter: RecyclerAdapter by lazy {
         RecyclerAdapter(list)
@@ -36,29 +39,35 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         rvInit()
-        imageCAC()
         rvClick()
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun imageCAC() {
-        if (adapter.mutableList.isEmpty()) {
-            binding.imageDelete.isVisible = false
-            Log.e("TAG", adapter.mutableList.toString() )
-        } else {
-            binding.imageAdd.isVisible = false
+        if (adapter.mutableList.isNotEmpty()) {
             binding.imageDelete.isVisible = true
+            binding.imageAdd.isGone = true
             binding.imageDelete.setOnClickListener {
+                adapter.boolean = false
                 list.removeAll(adapter.mutableList.toSet())
+                adapter.mutableList.removeAll(adapter.mutableList)
                 adapter.notifyDataSetChanged()
             }
+        } else {
+            binding.imageAdd.isVisible = true
+            binding.imageDelete.isVisible = false
         }
     }
 
+
     private fun rvClick() {
         adapter.onItemClick = {
+            imageCAC()
+            Log.e("TAG", adapter.mutableList.toString())
         }
         adapter.onItemLongClick = {
+            imageCAC()
+            Log.e("TAG", adapter.mutableList.toString())
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.gallerytest
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -19,7 +20,7 @@ class RecyclerAdapter(private val list: List<RecyclerEntity>) :
         RecyclerView.ViewHolder(binding.root) {
         fun onBind(ent: RecyclerEntity) {
             binding.imgMain.load(ent.url)
-
+            binding.imgSelected.isVisible = false
             itemView.setOnClickListener {
                 if (boolean) {
                     if (mutableList.isEmpty()) {
@@ -52,6 +53,7 @@ class RecyclerAdapter(private val list: List<RecyclerEntity>) :
                 } else {
                     ent.enabled = true
                     mutableList.add(ent)
+                    Log.e("TAG", mutableList.toString())
                     binding.imgSelected.isVisible = true
                     binding.btnRadio.isEnabled = true
                 }
