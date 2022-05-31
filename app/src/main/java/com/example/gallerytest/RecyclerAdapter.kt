@@ -1,66 +1,49 @@
 package com.example.gallerytest
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
+import androidx.recyclerview.selection.ItemDetailsLookup
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.gallerytest.databinding.ItemRecyclerBinding
 
-class RecyclerAdapter(private val list: List<RecyclerEntity>) :
+class RecyclerAdapter(
+    val list: ArrayList<String>,
+) :
     RecyclerView.Adapter<RecyclerAdapter.RecyclerViewHolder>() {
 
-    var onItemClick: ((RecyclerEntity) -> Unit)? = null
-    var onItemLongClick: ((RecyclerEntity) -> Unit)? = null
-    var boolean: Boolean = false
-    var mutableList = mutableListOf<RecyclerEntity>()
+    var tracker: SelectionTracker<Long>? = null
+
+    init {
+        setHasStableIds(true)
+    }
 
     inner class RecyclerViewHolder(private val binding: ItemRecyclerBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun onBind(ent: RecyclerEntity) {
-            binding.imgMain.load(ent.url)
-            binding.imgSelected.isVisible = false
-            itemView.setOnClickListener {
-                if (boolean) {
-                    if (mutableList.isEmpty()) {
-                        boolean = false
-                    } else {
-                        onItemClick?.invoke(list[absoluteAdapterPosition])
-                        if (ent.enabled) {
-                            ent.enabled = false
-                            mutableList.remove(ent)
-                            binding.imgSelected.isVisible = false
-                            binding.btnRadio.isEnabled = false
-                        } else {
-                            ent.enabled = true
-                            mutableList.add(ent)
-                            binding.imgSelected.isVisible = true
-                            binding.btnRadio.isEnabled = true
-                        }
-                    }
-                }
+        fun onBind(value: String, isActivated: Boolean = false) {
+            binding.imgMain.load(value)
+            binding.imgSelected.isVisible = isActivated
+            binding.btnRadio.isChecked = isActivated
+            if (isActivated) {
+                val animZoomOut = AnimationUtils.loadAnimation(itemView.context,
+                    R.anim.zoom_out)
+                binding.card.startAnimation(animZoomOut)
+            } else {
+                val animZoomIn = AnimationUtils.loadAnimation(itemView.context,
+                    R.anim.zoom_in)
+                binding.card.startAnimation(animZoomIn)
             }
-
-            itemView.setOnLongClickListener {
-                onItemLongClick?.invoke(list[absoluteAdapterPosition])
-                boolean = true
-                if (ent.enabled) {
-                    ent.enabled = false
-                    mutableList.remove(ent)
-                    binding.imgSelected.isVisible = false
-                    binding.btnRadio.isEnabled = false
-                } else {
-                    ent.enabled = true
-                    mutableList.add(ent)
-                    Log.e("TAG", mutableList.toString())
-                    binding.imgSelected.isVisible = true
-                    binding.btnRadio.isEnabled = true
-                }
-                return@setOnLongClickListener true
-            }
-
         }
+
+        fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
+            object : ItemDetailsLookup.ItemDetails<Long>() {
+                override fun getPosition(): Int = absoluteAdapterPosition
+                override fun getSelectionKey(): Long = itemId
+            }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
@@ -71,12 +54,15 @@ class RecyclerAdapter(private val list: List<RecyclerEntity>) :
             ))
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
+
+    override fun getItemId(position: Int): Long = position.toLong()
 
     override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
-        holder.onBind(list[position])
+        val number = list[position]
+        tracker?.let {
+            holder.onBind(number, it.isSelected(position.toLong()))
+        }
     }
 
 }
